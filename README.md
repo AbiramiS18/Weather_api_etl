@@ -1,6 +1,6 @@
 # Weather API ETL Pipeline
 
-A production-style Data Engineering ETL pipeline that extracts live weather data from the Open-Meteo API, transforms and validates the data, and loads it into a MySQL database.
+A Data Engineering ETL pipeline that extracts live weather data from the Open-Meteo API, transforms and validates the data, and loads it into MySQL using Apache Airflow for workflow orchestration.
 
 ---
 
@@ -10,42 +10,24 @@ A production-style Data Engineering ETL pipeline that extracts live weather data
 - Transform JSON into structured format
 - Validate data quality
 - Load data into MySQL
-- Logging
-- Exception Handling
+- Airflow DAG orchestration
+- Raw JSON and processed CSV storage
+- Logging and exception handling
+- Dockerized Airflow and MySQL
 - Environment variable configuration
-- Docker support
 
 ---
 
 ## Tech Stack
 
 - Python
+- Apache Airflow 2.10.0
 - Requests
 - Pandas
 - SQLAlchemy
 - PyMySQL
 - MySQL
-- Docker
-
----
-
-## Architecture
-
-```
-
-Open-Meteo API
-↓
-Extract
-↓
-Transform
-↓
-Validate
-↓
-MySQL
-↓
-Logging
-
-```
+- Docker & Docker Compose
 
 ---
 
@@ -53,11 +35,9 @@ Logging
 
 ```bash
 git clone <repo_url>
-
 cd weather_api_etl
 
 python -m venv venv
-
 source venv/bin/activate
 
 pip install -r requirements.txt
@@ -68,27 +48,50 @@ pip install -r requirements.txt
 ## Environment Variables
 
 ```
-DB_HOST=
-DB_PORT=
-DB_NAME=
-DB_USER=
+DB_HOST=weather_mysql
+DB_PORT=3306
+DB_NAME=weather_api
+DB_USER=root
 DB_PASSWORD=
 ```
 
 ---
 
-## Run
+## Run with Docker
 
 ```
-python -m app.main
+cd airflow
+docker compose up -d
 ```
 
 ---
 
-## Sample Output
+## Airflow
 
 ```
-ETL Completed Successfully
+Open the Airflow UI:
+http://localhost:8081
 
-Execution Time: 0.81 seconds
+Login:
+
+Username: admin
+Password: admin
+```
+
+---
+
+## Verify MySQL Data
+
+```
+docker exec -it weather_mysql \
+mysql -uroot -proot \
+-e "USE weather_api; SELECT * FROM weather_data;
+```
+
+---
+
+## Stop Services
+
+```
+docker compose down
 ```

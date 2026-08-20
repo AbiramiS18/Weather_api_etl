@@ -7,7 +7,7 @@ from app.logger import logger
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
 
-def extract_weather(latitude, longitude):
+def extract_weather(latitude=13.0827, longitude=80.2707):
     """
     Fetch current weather data from Open-Meteo API.
     """
@@ -54,3 +54,5 @@ def save_raw_json(data, filename="data/raw/weather.json"):
         json.dump(data, file, indent=4)
 
     logger.info(f"Raw JSON saved to {filename}")
+
+    return filename

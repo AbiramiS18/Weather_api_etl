@@ -4,7 +4,7 @@ from app.logger import logger
 
 def load_weather(df):
     """
-    Load weather data into MySQL.
+    Load validated weather DataFrame into MySQL.
     """
 
     try:

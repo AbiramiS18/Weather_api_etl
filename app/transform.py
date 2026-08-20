@@ -1,12 +1,14 @@
+import os
 import pandas as pd
 from datetime import datetime
 
 from app.logger import logger
 
 
-def transform_weather(data):
+def transform_weather(data, output_file="data/processed/weather.csv"):
     """
-    Transform raw weather JSON into a DataFrame.
+    Transform raw weather JSON into a DataFrame
+    and save it as a CSV.
     """
 
     logger.info("Transforming weather data...")
@@ -26,6 +28,10 @@ def transform_weather(data):
 
     df = pd.DataFrame([weather])
 
-    logger.info("Transformation completed.")
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-    return df
+    df.to_csv(output_file, index=False)
+
+    logger.info(f"Processed CSV saved to {output_file}")
+
+    return output_file

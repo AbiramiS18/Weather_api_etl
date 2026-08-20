@@ -1,0 +1,71 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: weather_mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: weather_api
+
+    ports:
+      - "3308:3306"
+
+    volumes:
+      - weather_mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    image: apache/airflow:2.10.0
+    container_name: airflow
+    restart: unless-stopped
+
+    ports:
+      - "8081:8080"
+
+    env_file:
+      - ../.env
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "True"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      PYTHONPATH: /opt/project
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ../app:/opt/project/app
+      - ../data:/opt/project/data
+      - ./requirements.txt:/requirements.txt
+
+    working_dir: /opt/airflow
+
+    command: >
+      bash -c "
+      pip install -r /requirements.txt &&
+      airflow db migrate &&
+      airflow users create
+      --username admin
+      --password admin
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email admin@example.com || true;
+      airflow webserver &
+      exec airflow scheduler
+      "
+
+volumes:
+  weather_mysql_data:
